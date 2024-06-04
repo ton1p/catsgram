@@ -1,83 +1,35 @@
 package ru.yandex.practicum.catsgram.controller;
 
-import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.catsgram.exception.ConditionsNotMetException;
-import ru.yandex.practicum.catsgram.exception.DuplicatedDataException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.catsgram.model.User;
+import ru.yandex.practicum.catsgram.service.UserService;
 
-import java.time.Instant;
-import java.util.*;
+import java.util.Collection;
 
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
-    Map<Long, User> users = new HashMap<>();
-
-    public List<String> getEmails() {
-        return users.values().stream().map(User::getEmail).toList();
-    }
+    private final UserService userService;
 
     @GetMapping
     public Collection<User> getUsers() {
-        return users.values();
+        return userService.getUsers();
     }
 
     @PostMapping
     public User createUser(@RequestBody User user) {
-        if (user.getEmail() == null) {
-            throw new ConditionsNotMetException("Имейл должен быть указан");
-        }
-        if (getEmails().contains(user.getEmail())) {
-            throw new DuplicatedDataException("Этот имейл уже используется");
-        }
-        user.setId(getNextId());
-        user.setRegistrationDate(Instant.now());
-        users.put(user.getId(), user);
-        return user;
+        return userService.createUser(user);
     }
 
     @PutMapping
     public User updateUser(@RequestBody User user) {
-        if (user.getId() == null) {
-            throw new ConditionsNotMetException("Id должен быть указан");
-        }
-
-        User result;
-
-        if (users.containsKey(user.getId())) {
-            result = users.get(user.getId());
-
-            if (!user.getEmail().equals(result.getEmail()) && getEmails().contains(user.getEmail())) {
-                throw new DuplicatedDataException("Этот имейл уже используется");
-            }
-
-            if (user.getUsername() != null) {
-                result.setUsername(user.getUsername());
-            }
-
-            if (user.getEmail() != null) {
-                result.setEmail(user.getEmail());
-            }
-
-            if (user.getPassword() != null) {
-                result.setPassword(user.getPassword());
-            }
-
-            return result;
-        }
-
-        result = user;
-        result.setId(getNextId());
-        users.put(user.getId(), result);
-        return result;
-    }
-
-    private long getNextId() {
-        long currentMaxId = users.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+        return userService.updateUser(user);
     }
 }
