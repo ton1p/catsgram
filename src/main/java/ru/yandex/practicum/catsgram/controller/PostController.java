@@ -16,6 +16,7 @@ import ru.yandex.practicum.catsgram.model.SortOrder;
 import ru.yandex.practicum.catsgram.service.PostService;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/posts")
@@ -35,7 +36,7 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    public Post findById(@PathVariable Long id) {
+    public Optional<Post> findById(@PathVariable Long id) {
         return postService.findById(id);
     }
 

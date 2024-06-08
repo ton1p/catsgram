@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class PostService {
@@ -43,12 +44,12 @@ public class PostService {
         return result.subList(fromIndex, toIndex);
     }
 
-    public Post findById(Long id) {
+    public Optional<Post> findById(Long id) {
         Post post = posts.get(id);
         if (post == null) {
-            throw new NotFoundException(String.format("Пост с id = %s не найден", id));
+            return Optional.empty();
         }
-        return post;
+        return Optional.of(post);
     }
 
     public Post create(Post post) {
